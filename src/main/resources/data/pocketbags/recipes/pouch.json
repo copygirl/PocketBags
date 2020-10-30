@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SWS",
+    "WLW",
+    "WWW"
+  ],
+  "key": {
+    "S": { "item": "minecraft:string" },
+    "W": { "tag": "wool" },
+    "L": { "item": "minecraft:leather" }
+  },
+  "result": {
+    "item": "pocketbags:pouch",
+    "count": 1
+  }
+}

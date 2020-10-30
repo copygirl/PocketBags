@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pocketbags",
+  "version": "${version}",
+  "name": "PocketBags",
+  "description": "Adds a pouch to store, plant and use seeds, crops and animal feed.",
+  "authors": [ "copygirl" ],
+  "contact": {
+    "homepage": "https://github.com/copygirl/PocketBagsFabric",
+    "sources": "https://github.com/copygirl/PocketBagsFabric"
+  },
+  "license": "MIT",
+  "icon": "assets/pocketbags/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [ "net.mcft.copy.bags.PocketBagsMod" ],
+    "client": [ "net.mcft.copy.bags.PocketBagsModClient" ]
+  },
+  "mixins": [
+    { "config": "mixins.pocketbags.client.json", "environment": "client" },
+    { "config": "mixins.pocketbags.common.json", "environment": "*" }
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+}

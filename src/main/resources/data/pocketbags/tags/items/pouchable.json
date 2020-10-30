@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "#flowers",
+    "#saplings",
+    "#c:seeds",
+
+    "minecraft:apple",
+    "minecraft:bamboo",
+    "minecraft:beetroot",
+    "minecraft:bone_meal",
+    "minecraft:brown_mushroom",
+    "minecraft:cactus",
+    "minecraft:carrot",
+    "minecraft:chorus_flower",
+    "minecraft:chorus_fruit",
+    "minecraft:cocoa_beans",
+    "minecraft:crimson_fungus",
+    "minecraft:kelp",
+    "minecraft:melon_slice",
+    "minecraft:melon",
+    "minecraft:nether_wart",
+    "minecraft:potato",
+    "minecraft:pumpkin",
+    "minecraft:red_mushroom",
+    "minecraft:seagrass",
+    "minecraft:sugar_cane",
+    "minecraft:sweet_berries",
+    "minecraft:warped_fungus",
+    "minecraft:wheat"
+  ]
+}
