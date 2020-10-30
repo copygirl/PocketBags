@@ -6,8 +6,8 @@
   "description": "Adds a pouch to store, plant and use seeds, crops and animal feed.",
   "authors": [ "copygirl" ],
   "contact": {
-    "homepage": "https://github.com/copygirl/PocketBagsFabric",
-    "sources": "https://github.com/copygirl/PocketBagsFabric"
+    "homepage": "https://github.com/copygirl/PocketBags",
+    "sources": "https://github.com/copygirl/PocketBags"
   },
   "license": "MIT",
   "icon": "assets/pocketbags/icon.png",
