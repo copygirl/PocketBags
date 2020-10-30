@@ -4,7 +4,7 @@
 
 ## Downloads
 
-Available right here through [GitHub Releases](https://github.com/copygirl/).
+Available right here through [GitHub Releases](https://github.com/copygirl/PocketBags/releases).
 
 ## ![](docs/pouch.png) Pouch
 
