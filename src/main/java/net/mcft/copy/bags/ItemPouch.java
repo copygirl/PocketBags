@@ -1,5 +1,6 @@
 package net.mcft.copy.bags;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
@@ -127,12 +128,17 @@ public class ItemPouch extends Item {
 			return ActionResult.PASS;
 		ActionResult result = ActionResult.PASS;
 
-		// Find all entities of the same type (and adult state) in range.
-		Box box = new Box(origEntity.getPos().subtract(1.5, 1.0, 1.5), origEntity.getPos().add(1.5, 1.0, 1.5));
-		@SuppressWarnings("unchecked")
-		EntityType<LivingEntity> type = (EntityType<LivingEntity>) origEntity.getType();
-		List<LivingEntity> entities = player.world.getEntitiesByType(type, box,
-				e -> (e.isBaby() == origEntity.isBaby()));
+		List<LivingEntity> entities;
+		if (player.isSneaking()) {
+			// When sneaking, only interact with the clicked entity.
+			entities = Arrays.asList(origEntity);
+		} else {
+			// Find all entities of the same type (and adult state) in range.
+			Box box = new Box(origEntity.getPos().subtract(1.5, 1.0, 1.5), origEntity.getPos().add(1.5, 1.0, 1.5));
+			@SuppressWarnings("unchecked")
+			EntityType<LivingEntity> type = (EntityType<LivingEntity>) origEntity.getType();
+			entities = player.world.getEntitiesByType(type, box, e -> (e.isBaby() == origEntity.isBaby()));
+		}
 
 		// Set currently held item to the pouch contents.
 		ItemPouch.setStackInHand(player, hand, contents);
