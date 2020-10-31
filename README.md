@@ -10,9 +10,9 @@ Available right here through [GitHub Releases](https://github.com/copygirl/Pocke
 
 ![](docs/pouch_screenshot.png)
 
-You can fill pouches with up to 9 stacks of any supported item, which includes most farmables (seeds and their resulting crops), saplings and flowers. Once a pouch has any item in it, it will automatically collect more of them as you pick them up.
+You can fill pouches with up to 9 stacks of any supported item, which includes most farmables (seeds and their resulting crops), saplings and flowers. Open it by sneaking and right-clicking in the air. Once a pouch has any item in it, it will automatically collect more of them as you pick them up.
 
-They have the functionality to use the contained items in a 3x3 space centered on a block you click (such as planting up to 9 seeds), as well as feeding or breeding animals in a radius around the one you interact with.
+They have the functionality to use the contained items in a 3x3 space centered on a block you click (such as planting up to 9 seeds), as well as feeding or breeding animals in a radius around the one you interact with. When sneaking, only the clicked block or entity is interacted with.
 
 ### Crafting Recipe
 
