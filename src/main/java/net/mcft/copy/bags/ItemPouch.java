@@ -3,6 +3,11 @@ package net.mcft.copy.bags;
 import java.util.Arrays;
 import java.util.List;
 
+import net.mcft.copy.bags.client.ICustomDurabilityBar;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 
@@ -34,7 +39,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-public class ItemPouch extends Item implements IItemPickupSink {
+@EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
+public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilityBar {
 
 	public static final ScreenHandlerType<PouchScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
 			.registerExtended(PocketBagsMod.POUCH_ID, PouchScreenHandler::new);
@@ -213,6 +219,17 @@ public class ItemPouch extends Item implements IItemPickupSink {
 			player.inventory.setStack(player.inventory.selectedSlot, stack);
 		else
 			player.inventory.offHand.set(0, stack);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public float getCustomDurability(ItemStack stack) {
+		ItemStack contents = ItemPouch.getContents(stack);
+		if (contents.isEmpty())
+			return Float.NaN;
+
+		float count = contents.getCount();
+		float maxCount = contents.getMaxCount() * 9;
+		return count / maxCount;
 	}
 
 }
