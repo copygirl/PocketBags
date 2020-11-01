@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -33,7 +34,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-public class ItemPouch extends Item {
+public class ItemPouch extends Item implements IItemPickupSink {
 
 	public static final ScreenHandlerType<PouchScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
 			.registerExtended(PocketBagsMod.POUCH_ID, PouchScreenHandler::new);
@@ -44,17 +45,17 @@ public class ItemPouch extends Item {
 		super(new Item.Settings().group(ItemGroup.MISC).maxCount(1));
 	}
 
-	public boolean collect(ItemStack pouch, ItemStack stack) {
-		if (!ItemPouch.isPouchableItem(stack))
+	public boolean collect(ServerPlayerEntity player, ItemStack pouch, ItemStack pickup) {
+		if (!ItemPouch.isPouchableItem(pickup))
 			return false;
 		ItemStack contents = ItemPouch.getContents(pouch);
-		if (ItemStack.areItemsEqual(contents, stack) && ItemStack.areTagsEqual(contents, stack)) {
-			int maxCount = stack.getMaxCount() * 9;
+		if (ItemStack.areItemsEqual(contents, pickup) && ItemStack.areTagsEqual(contents, pickup)) {
+			int maxCount = pickup.getMaxCount() * 9;
 			if (contents.getCount() < maxCount) {
-				int newCount = Math.min(maxCount, contents.getCount() + stack.getCount());
+				int newCount = Math.min(maxCount, contents.getCount() + pickup.getCount());
 				int diff = newCount - contents.getCount();
 				contents.setCount(newCount);
-				stack.setCount(stack.getCount() - diff);
+				pickup.setCount(pickup.getCount() - diff);
 				ItemPouch.setContents(pouch, contents);
 				return true;
 			}

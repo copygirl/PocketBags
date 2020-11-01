@@ -2,13 +2,15 @@ package net.mcft.copy.bags.mixin;
 
 import java.util.UUID;
 
-import net.mcft.copy.bags.ItemPouch;
+import net.mcft.copy.bags.IItemPickupSink;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stats;
 import net.minecraft.world.World;
 
@@ -33,8 +35,11 @@ public abstract class MixinItemEntity extends Entity {
 		super(entityType, world);
 	}
 
-	// Before picking up an item into the player's inventory, try to
-	// insert it into any pouches that already contain that same item.
+	/**
+	 * Before picking up an item into the player's inventory, try to see if there's
+	 * any item implementing {@see IItemPickupSink} in their inventory, and allow it
+	 * to modify the pickup behavior.
+	 */
 	@Inject(method = "onPlayerCollision", at = @At("HEAD"), cancellable = true)
 	private void pocketbags$onPlayerCollision(PlayerEntity player, CallbackInfo info) {
 		if (player.world.isClient)
@@ -45,9 +50,9 @@ public abstract class MixinItemEntity extends Entity {
 		if ((this.pickupDelay == 0) && ((this.owner == null) || this.owner.equals(player.getUuid()))) {
 			for (int i = 0; i < player.inventory.size(); i++) {
 				ItemStack invStack = player.inventory.getStack(i);
-				if (!(invStack.getItem() instanceof ItemPouch))
+				if (!(invStack.getItem() instanceof IItemPickupSink))
 					continue;
-				if (((ItemPouch) invStack.getItem()).collect(invStack, stack)) {
+				if (((IItemPickupSink) invStack.getItem()).collect((ServerPlayerEntity) player, invStack, stack)) {
 					player.sendPickup(this, count);
 					player.increaseStat(Stats.PICKED_UP.getOrCreateStat(item), count);
 					if (stack.isEmpty()) {
