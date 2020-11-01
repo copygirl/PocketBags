@@ -1,4 +1,6 @@
-package net.mcft.copy.bags;
+package net.mcft.copy.bags.client;
+
+import net.mcft.copy.bags.ItemPouch;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;

@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "net.mcft.copy.bags.mixin",
+  "package": "net.mcft.copy.bags.client.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinInGameHud",

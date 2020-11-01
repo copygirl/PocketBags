@@ -14,7 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [ "net.mcft.copy.bags.PocketBagsMod" ],
-    "client": [ "net.mcft.copy.bags.PocketBagsModClient" ]
+    "client": [ "net.mcft.copy.bags.client.PocketBagsModClient" ]
   },
   "mixins": [
     { "config": "mixins.pocketbags.client.json", "environment": "client" },

@@ -1,4 +1,4 @@
-package net.mcft.copy.bags;
+package net.mcft.copy.bags.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 

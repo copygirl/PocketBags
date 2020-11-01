@@ -1,4 +1,4 @@
-package net.mcft.copy.bags.mixin;
+package net.mcft.copy.bags.client.mixin;
 
 import net.mcft.copy.bags.ItemPouch;
 
