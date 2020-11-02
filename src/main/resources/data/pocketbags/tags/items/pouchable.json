@@ -5,7 +5,14 @@
     "#saplings",
     "#c:seeds",
 
-    "#sandwichable:sandwichable",
+    "sandwichable:cucumber",
+    "sandwichable:cucumber_seeds",
+    "sandwichable:lettuce_head",
+    "sandwichable:lettuce_seeds",
+    "sandwichable:onion",
+    "sandwichable:onion_seeds",
+    "sandwichable:tomato",
+    "sandwichable:tomato_seeds"
 
     "minecraft:apple",
     "minecraft:bamboo",
