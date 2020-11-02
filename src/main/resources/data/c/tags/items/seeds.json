@@ -4,6 +4,11 @@
     "minecraft:beetroot_seeds",
     "minecraft:melon_seeds",
     "minecraft:pumpkin_seeds",
-    "minecraft:wheat_seeds"
+    "minecraft:wheat_seeds",
+
+    "sandwichable:cucumber_seeds",
+    "sandwichable:lettuce_seeds",
+    "sandwichable:onion_seeds",
+    "sandwichable:tomato_seeds"
   ]
 }
