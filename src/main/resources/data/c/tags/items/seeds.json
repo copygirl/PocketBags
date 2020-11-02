@@ -6,9 +6,9 @@
     "minecraft:pumpkin_seeds",
     "minecraft:wheat_seeds",
 
-    "sandwichable:cucumber_seeds",
-    "sandwichable:lettuce_seeds",
-    "sandwichable:onion_seeds",
-    "sandwichable:tomato_seeds"
+    { "id": "sandwichable:cucumber_seeds", "required": false },
+    { "id": "sandwichable:lettuce_seeds", "required": false },
+    { "id": "sandwichable:onion_seeds", "required": false },
+    { "id": "sandwichable:tomato_seeds", "required": false }
   ]
 }

@@ -29,9 +29,9 @@
     "minecraft:warped_fungus",
     "minecraft:wheat",
     
-    "sandwichable:cucumber",
-    "sandwichable:lettuce_head",
-    "sandwichable:onion",
-    "sandwichable:tomato"
+    { "id": "sandwichable:cucumber", "required": false },
+    { "id": "sandwichable:lettuce_head", "required": false },
+    { "id": "sandwichable:onion", "required": false },
+    { "id": "sandwichable:tomato", "required": false }
   ]
 }
