@@ -27,6 +27,11 @@
     "minecraft:sugar_cane",
     "minecraft:sweet_berries",
     "minecraft:warped_fungus",
-    "minecraft:wheat"
+    "minecraft:wheat",
+    
+    "sandwichable:cucumber",
+    "sandwichable:lettuce_head",
+    "sandwichable:onion",
+    "sandwichable:tomato"
   ]
 }
