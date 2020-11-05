@@ -20,8 +20,7 @@ public interface IItemPickupSink {
 	 *               items are picked up (typically NBT data).
 	 * @param pickup Stack being attempted to pick up by player. Count must be
 	 *               modified when any items are picked up.
-	 * @return {@code true} if any items were collected, {@code false} otherwise.
 	 */
-	boolean collect(ServerPlayerEntity player, ItemStack sink, ItemStack pickup);
+	void collect(ServerPlayerEntity player, ItemStack sink, ItemStack pickup);
 
 }

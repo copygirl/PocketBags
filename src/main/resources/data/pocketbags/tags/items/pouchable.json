@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "#flowers",
     "#saplings",
     "#c:seeds",
 
@@ -28,7 +27,7 @@
     "minecraft:sweet_berries",
     "minecraft:warped_fungus",
     "minecraft:wheat",
-    
+
     { "id": "sandwichable:cucumber", "required": false },
     { "id": "sandwichable:lettuce_head", "required": false },
     { "id": "sandwichable:onion", "required": false },

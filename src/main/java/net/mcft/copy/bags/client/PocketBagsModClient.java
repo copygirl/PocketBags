@@ -1,5 +1,6 @@
 package net.mcft.copy.bags.client;
 
+import net.mcft.copy.bags.ItemFlowerPouch;
 import net.mcft.copy.bags.ItemPouch;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -12,7 +13,8 @@ public class PocketBagsModClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ScreenRegistry.register(ItemPouch.SCREEN_HANDLER, PouchScreen::new);
+		ScreenRegistry.register(ItemPouch.SCREEN_HANDLER, ItemScreen::new);
+		ScreenRegistry.register(ItemFlowerPouch.SCREEN_HANDLER, ItemScreen::new);
 	}
 
 }

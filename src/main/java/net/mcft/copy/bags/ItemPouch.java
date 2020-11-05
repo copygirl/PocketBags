@@ -15,11 +15,13 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.Tag;
@@ -42,37 +44,37 @@ import net.minecraft.world.World;
 @EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
 public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilityBar {
 
-	public static final ScreenHandlerType<PouchScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
-			.registerExtended(PocketBagsMod.POUCH_ID, PouchScreenHandler::new);
-
+	public static final int SLOTS = 9;
+	public static final Identifier IDENTIFIER = new Identifier(PocketBagsMod.MOD_ID, "pouch");
 	public static final Tag<Item> POUCHABLE_TAG = TagRegistry.item(new Identifier(PocketBagsMod.MOD_ID, "pouchable"));
+
+	public static final ScreenHandlerType<ItemPouch.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
+			.registerExtended(IDENTIFIER, ItemPouch.ScreenHandler::new);
 
 	public ItemPouch() {
 		super(new Item.Settings().group(ItemGroup.MISC).maxCount(1));
 	}
 
-	public boolean collect(ServerPlayerEntity player, ItemStack pouch, ItemStack pickup) {
+	public void collect(ServerPlayerEntity player, ItemStack pouch, ItemStack pickup) {
 		if (!ItemPouch.isPouchableItem(pickup))
-			return false;
+			return;
 		ItemStack contents = ItemPouch.getContents(pouch);
 		if (ItemStack.areItemsEqual(contents, pickup) && ItemStack.areTagsEqual(contents, pickup)) {
-			int maxCount = pickup.getMaxCount() * 9;
+			int maxCount = pickup.getMaxCount() * SLOTS;
 			if (contents.getCount() < maxCount) {
 				int newCount = Math.min(maxCount, contents.getCount() + pickup.getCount());
 				int diff = newCount - contents.getCount();
 				contents.setCount(newCount);
-				pickup.setCount(pickup.getCount() - diff);
+				pickup.decrement(diff);
 				ItemPouch.setContents(pouch, contents);
-				return true;
 			}
 		}
-		return false;
 	}
 
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		if (!world.isClient && user.isSneaking() && (hand == Hand.MAIN_HAND))
-			user.openHandledScreen(new PouchScreenHandler.Factory(user));
+			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, ItemPouch.ScreenHandler.class));
 		return super.use(world, user, hand);
 	}
 
@@ -171,11 +173,9 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		CompoundTag tag = stack.getSubTag(PocketBagsMod.POUCH_ID.toString());
-		if (tag == null)
+		ItemStack contents = ItemPouch.getContents(stack);
+		if (contents.isEmpty())
 			return;
-		ItemStack contents = ItemStack.fromTag(tag);
-		contents.setCount(tag.getInt("Count"));
 		tooltip.add(new LiteralText(contents.getCount() + "x ").append(contents.getName())
 				.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
 	}
@@ -191,7 +191,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	public static ItemStack getContents(ItemStack stack) {
 		if (stack.isEmpty() || !(stack.getItem() instanceof ItemPouch))
 			return ItemStack.EMPTY;
-		CompoundTag tag = stack.getSubTag(PocketBagsMod.POUCH_ID.toString());
+		CompoundTag tag = stack.getSubTag("Contents");
 		if (tag == null)
 			return ItemStack.EMPTY;
 		ItemStack contents = ItemStack.fromTag(tag);
@@ -203,11 +203,10 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	public static void setContents(ItemStack stack, ItemStack contents) {
 		if (stack.isEmpty() || !(stack.getItem() instanceof ItemPouch))
 			throw new IllegalArgumentException("Specified stack is not an ItemPouch");
-		String key = PocketBagsMod.POUCH_ID.toString();
 		if (contents.isEmpty())
-			stack.removeSubTag(key);
+			stack.removeSubTag("Contents");
 		else {
-			CompoundTag tag = stack.getOrCreateSubTag(key);
+			CompoundTag tag = stack.getOrCreateSubTag("Contents");
 			contents.toTag(tag);
 			// Again, toTag writes a byte, but we want it to be an int.
 			tag.putInt("Count", contents.getCount());
@@ -230,6 +229,95 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 		float count = contents.getCount();
 		float maxCount = contents.getMaxCount() * 9;
 		return count / maxCount;
+	}
+
+	public static class Inventory extends ItemInventory {
+
+		public Inventory(ItemStack stack) {
+			super(stack, ItemPouch.SLOTS);
+		}
+
+		@Override
+		protected void readFromTag(net.minecraft.nbt.Tag tag) {
+			CompoundTag compound = (CompoundTag) tag;
+			ItemStack contents = ItemStack.fromTag(compound);
+			// fromTag reads a byte but we want an int to allow Count > 127.
+			contents.setCount(compound.getInt("Count"));
+
+			int maxStackCount = Math.min(contents.getMaxCount(), this.getMaxCountPerStack());
+			for (int i = 0; i < this.size() && !contents.isEmpty(); i++)
+				this.setStack(i, contents.split(maxStackCount));
+		}
+
+		@Override
+		protected net.minecraft.nbt.Tag writeToTag() {
+			// Collect the items inside this inventory.
+			ItemStack contents = ItemStack.EMPTY;
+			for (int i = 0; i < this.size(); i++) {
+				ItemStack invStack = this.getStack(i);
+				if (invStack.isEmpty())
+					continue;
+				if (contents.isEmpty())
+					contents = invStack.copy();
+				else
+					contents.increment(invStack.getCount());
+			}
+
+			CompoundTag compound = contents.toTag(new CompoundTag());
+			// Again, toTag writes a byte, but we want it to be an int.
+			compound.putInt("Count", contents.getCount());
+			return compound;
+		}
+
+	}
+
+	public static class ScreenHandler extends ItemScreenHandler {
+
+		public ScreenHandler(int syncId, PlayerInventory playerInventory, int protectedSlot, ItemStack stack) {
+			super(ItemPouch.SCREEN_HANDLER, syncId, playerInventory, new ItemPouch.Inventory(stack), protectedSlot);
+		}
+
+		public ScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+			super(ItemPouch.SCREEN_HANDLER, syncId, playerInventory, new ItemPouch.Inventory(ItemStack.EMPTY),
+					buf.readByte());
+		}
+
+		@Override
+		protected void buildInventorySlots(int x, int y) {
+			for (int i = 0; i < this.inventory.size(); ++i) {
+				int xx = x + (i % 9) * 18;
+				int yy = y + (i / 9) * 18;
+				this.addSlot(new ItemPouch.Slot(this.inventory, i, xx, yy));
+			}
+		}
+
+	}
+
+	public static class Slot extends net.minecraft.screen.slot.Slot {
+
+		private final int index;
+
+		public Slot(net.minecraft.inventory.Inventory inventory, int index, int x, int y) {
+			super(inventory, index, x, y);
+			this.index = index;
+		}
+
+		@Override
+		public boolean canInsert(ItemStack stack) {
+			if (!ItemPouch.isPouchableItem(stack))
+				return false;
+			for (int i = 0; i < this.inventory.size(); i++) {
+				// Ignore this slot to allow swapping if it's the only filled slot.
+				if (i == this.index)
+					continue;
+				ItemStack invStack = this.inventory.getStack(i);
+				if (!invStack.isEmpty())
+					return ItemStack.areItemsEqual(stack, invStack) && ItemStack.areTagsEqual(stack, invStack);
+			}
+			// All slots empty (or only this slot filled), insertion is possible.
+			return true;
+		}
+
 	}
 
 }

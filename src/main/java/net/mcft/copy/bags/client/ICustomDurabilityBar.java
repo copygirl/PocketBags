@@ -28,6 +28,14 @@ public interface ICustomDurabilityBar {
 	float getCustomDurability(ItemStack stack);
 
 	/**
+	 * @param fraction Fullness of the durability bar, ranging [0.0, 1.0].
+	 * @return The RGB color value that should be drawn for this durabiltiy bar.
+	 */
+	default int getCustomDurabilityColor(float fraction) {
+		return MathHelper.hsvToRgb(fraction / 3, 1.0F, 1.0F);
+	}
+
+	/**
 	 * Gets the offset to draw the custom durability bar at, for example when you
 	 * want to draw an additional durability bar above the default one.
 	 *
@@ -39,14 +47,6 @@ public interface ICustomDurabilityBar {
 	 */
 	default int getCustomDurabilityOffset() {
 		return 13;
-	}
-
-	/**
-	 * @param fraction Fullness of the durability bar, ranging [0.0, 1.0].
-	 * @return The RGB color value that should be drawn for this durabiltiy bar.
-	 */
-	default int getCustomDurabilityColor(float fraction) {
-		return MathHelper.hsvToRgb(fraction / 3, 1.0F, 1.0F);
 	}
 
 }

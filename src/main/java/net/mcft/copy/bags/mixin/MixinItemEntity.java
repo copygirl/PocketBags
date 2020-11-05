@@ -52,7 +52,9 @@ public abstract class MixinItemEntity extends Entity {
 				ItemStack invStack = player.inventory.getStack(i);
 				if (!(invStack.getItem() instanceof IItemPickupSink))
 					continue;
-				if (((IItemPickupSink) invStack.getItem()).collect((ServerPlayerEntity) player, invStack, stack)) {
+				int previousCount = stack.getCount();
+				((IItemPickupSink) invStack.getItem()).collect((ServerPlayerEntity) player, invStack, stack);
+				if (stack.getCount() < previousCount) {
 					player.sendPickup(this, count);
 					player.increaseStat(Stats.PICKED_UP.getOrCreateStat(item), count);
 					if (stack.isEmpty()) {
