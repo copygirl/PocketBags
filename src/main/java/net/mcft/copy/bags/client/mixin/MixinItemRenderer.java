@@ -1,6 +1,6 @@
 package net.mcft.copy.bags.client.mixin;
 
-import net.mcft.copy.bags.ItemPouch;
+import net.mcft.copy.bags.PouchItem;
 import net.mcft.copy.bags.client.ICustomDurabilityBar;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -32,8 +32,8 @@ public abstract class MixinItemRenderer {
 	@Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"))
 	public void pocketbags$renderGuiItemOverlay(TextRenderer renderer, ItemStack stack, int x, int y,
 			@Nullable String countLabel, CallbackInfo info) {
-		if (stack.getItem() instanceof ItemPouch) {
-			ItemStack contents = ItemPouch.getContents(stack);
+		if (stack.getItem() instanceof PouchItem) {
+			ItemStack contents = PouchItem.getContents(stack);
 			if (!contents.isEmpty()) {
 				RenderSystem.pushMatrix();
 				RenderSystem.translatef(x, y, 0);

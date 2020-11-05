@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -35,23 +34,23 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 @EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
-public class ItemFlowerPouch extends Item implements IItemPickupSink, ICustomDurabilityBar {
+public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDurabilityBar {
 
 	public static final int SLOTS = 18;
 	public static final int MAX_COUNT_PER_STACK = 32;
 	public static final Identifier IDENTIFIER = new Identifier(PocketBagsMod.MOD_ID, "flower_pouch");
 
-	public static final ScreenHandlerType<ItemFlowerPouch.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
-			.registerExtended(IDENTIFIER, ItemFlowerPouch.ScreenHandler::new);
+	public static final ScreenHandlerType<FlowerPouchItem.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
+			.registerExtended(IDENTIFIER, FlowerPouchItem.ScreenHandler::new);
 
-	public ItemFlowerPouch() {
+	public FlowerPouchItem() {
 		super(new Item.Settings().group(ItemGroup.MISC).maxCount(1));
 	}
 
 	public void collect(ServerPlayerEntity player, ItemStack pouch, ItemStack pickup) {
 		if (!ItemTags.FLOWERS.contains(pickup.getItem()))
 			return;
-		ItemFlowerPouch.Inventory inventory = new ItemFlowerPouch.Inventory(pouch);
+		FlowerPouchItem.Inventory inventory = new FlowerPouchItem.Inventory(pouch);
 		// addStack creates a copy of the input stack, so we use setCount.
 		pickup.setCount(inventory.addStack(pickup).getCount());
 	}
@@ -59,14 +58,14 @@ public class ItemFlowerPouch extends Item implements IItemPickupSink, ICustomDur
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		if (!world.isClient && user.isSneaking() && (hand == Hand.MAIN_HAND))
-			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, ItemFlowerPouch.ScreenHandler.class));
+			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, FlowerPouchItem.ScreenHandler.class));
 		return super.use(world, user, hand);
 	}
 
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
 		ArrayList<ItemStack> stacked = new ArrayList<>();
-		for (ItemStack item : new ItemFlowerPouch.Inventory(stack)) {
+		for (ItemStack item : new FlowerPouchItem.Inventory(stack)) {
 			Optional<ItemStack> found = stacked.stream()
 					.filter(i -> ItemStack.areItemsEqual(i, item) && ItemStack.areTagsEqual(i, item)).findAny();
 			if (found.isPresent())
@@ -88,7 +87,7 @@ public class ItemFlowerPouch extends Item implements IItemPickupSink, ICustomDur
 		int maxCount = SLOTS * MAX_COUNT_PER_STACK;
 		int count = 0;
 		// TODO: This could be made cheaper by just iterating the tags.
-		for (ItemStack item : new ItemFlowerPouch.Inventory(stack))
+		for (ItemStack item : new FlowerPouchItem.Inventory(stack))
 			count += item.getCount();
 		return (count > 0) ? (float) count / maxCount : Float.NaN;
 	}
@@ -96,7 +95,7 @@ public class ItemFlowerPouch extends Item implements IItemPickupSink, ICustomDur
 	public static class Inventory extends ItemInventory {
 
 		public Inventory(ItemStack stack) {
-			super(stack, ItemFlowerPouch.SLOTS);
+			super(stack, FlowerPouchItem.SLOTS);
 		}
 
 		@Override
@@ -137,13 +136,13 @@ public class ItemFlowerPouch extends Item implements IItemPickupSink, ICustomDur
 	public static class ScreenHandler extends ItemScreenHandler {
 
 		public ScreenHandler(int syncId, PlayerInventory playerInventory, int protectedSlot, ItemStack stack) {
-			super(ItemFlowerPouch.SCREEN_HANDLER, syncId, playerInventory, new ItemFlowerPouch.Inventory(stack),
+			super(FlowerPouchItem.SCREEN_HANDLER, syncId, playerInventory, new FlowerPouchItem.Inventory(stack),
 					protectedSlot);
 		}
 
 		public ScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-			super(ItemFlowerPouch.SCREEN_HANDLER, syncId, playerInventory,
-					new ItemFlowerPouch.Inventory(ItemStack.EMPTY), buf.readByte());
+			super(FlowerPouchItem.SCREEN_HANDLER, syncId, playerInventory,
+					new FlowerPouchItem.Inventory(ItemStack.EMPTY), buf.readByte());
 		}
 
 		@Override

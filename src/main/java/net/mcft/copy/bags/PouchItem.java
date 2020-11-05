@@ -42,23 +42,23 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 @EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
-public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilityBar {
+public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilityBar {
 
 	public static final int SLOTS = 9;
 	public static final Identifier IDENTIFIER = new Identifier(PocketBagsMod.MOD_ID, "pouch");
 	public static final Tag<Item> POUCHABLE_TAG = TagRegistry.item(new Identifier(PocketBagsMod.MOD_ID, "pouchable"));
 
-	public static final ScreenHandlerType<ItemPouch.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
-			.registerExtended(IDENTIFIER, ItemPouch.ScreenHandler::new);
+	public static final ScreenHandlerType<PouchItem.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
+			.registerExtended(IDENTIFIER, PouchItem.ScreenHandler::new);
 
-	public ItemPouch() {
+	public PouchItem() {
 		super(new Item.Settings().group(ItemGroup.MISC).maxCount(1));
 	}
 
 	public void collect(ServerPlayerEntity player, ItemStack pouch, ItemStack pickup) {
-		if (!ItemPouch.isPouchableItem(pickup))
+		if (!PouchItem.isPouchableItem(pickup))
 			return;
-		ItemStack contents = ItemPouch.getContents(pouch);
+		ItemStack contents = PouchItem.getContents(pouch);
 		if (ItemStack.areItemsEqual(contents, pickup) && ItemStack.areTagsEqual(contents, pickup)) {
 			int maxCount = pickup.getMaxCount() * SLOTS;
 			if (contents.getCount() < maxCount) {
@@ -66,7 +66,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 				int diff = newCount - contents.getCount();
 				contents.setCount(newCount);
 				pickup.decrement(diff);
-				ItemPouch.setContents(pouch, contents);
+				PouchItem.setContents(pouch, contents);
 			}
 		}
 	}
@@ -74,7 +74,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		if (!world.isClient && user.isSneaking() && (hand == Hand.MAIN_HAND))
-			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, ItemPouch.ScreenHandler.class));
+			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, PouchItem.ScreenHandler.class));
 		return super.use(world, user, hand);
 	}
 
@@ -82,7 +82,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	public ActionResult useOnBlock(ItemUsageContext context) {
 		PlayerEntity player = context.getPlayer();
 		ItemStack pouch = context.getStack();
-		ItemStack contents = ItemPouch.getContents(pouch);
+		ItemStack contents = PouchItem.getContents(pouch);
 		if (contents.isEmpty())
 			return ActionResult.PASS;
 		ActionResult result = ActionResult.PASS;
@@ -107,7 +107,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 		}
 
 		// Set currently held item to the pouch contents.
-		ItemPouch.setStackInHand(player, context.getHand(), contents);
+		PouchItem.setStackInHand(player, context.getHand(), contents);
 
 		try {
 			// Use contents stack on all blocks in order.
@@ -123,8 +123,8 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 			}
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
-			ItemPouch.setContents(pouch, player.getStackInHand(context.getHand()));
-			ItemPouch.setStackInHand(player, context.getHand(), pouch);
+			PouchItem.setContents(pouch, player.getStackInHand(context.getHand()));
+			PouchItem.setStackInHand(player, context.getHand(), pouch);
 		}
 
 		return result;
@@ -132,7 +132,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 
 	@Override
 	public ActionResult useOnEntity(ItemStack pouch, PlayerEntity player, LivingEntity origEntity, Hand hand) {
-		ItemStack contents = ItemPouch.getContents(pouch);
+		ItemStack contents = PouchItem.getContents(pouch);
 		if (contents.isEmpty())
 			return ActionResult.PASS;
 		ActionResult result = ActionResult.PASS;
@@ -150,7 +150,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 		}
 
 		// Set currently held item to the pouch contents.
-		ItemPouch.setStackInHand(player, hand, contents);
+		PouchItem.setStackInHand(player, hand, contents);
 
 		try {
 			// Use contents on found entities.
@@ -164,8 +164,8 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 			}
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
-			ItemPouch.setContents(pouch, player.getStackInHand(hand));
-			ItemPouch.setStackInHand(player, hand, pouch);
+			PouchItem.setContents(pouch, player.getStackInHand(hand));
+			PouchItem.setStackInHand(player, hand, pouch);
 		}
 
 		return result;
@@ -173,7 +173,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		ItemStack contents = ItemPouch.getContents(stack);
+		ItemStack contents = PouchItem.getContents(stack);
 		if (contents.isEmpty())
 			return;
 		tooltip.add(new LiteralText(contents.getCount() + "x ").append(contents.getName())
@@ -189,7 +189,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	}
 
 	public static ItemStack getContents(ItemStack stack) {
-		if (stack.isEmpty() || !(stack.getItem() instanceof ItemPouch))
+		if (stack.isEmpty() || !(stack.getItem() instanceof PouchItem))
 			return ItemStack.EMPTY;
 		CompoundTag tag = stack.getSubTag("Contents");
 		if (tag == null)
@@ -201,7 +201,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	}
 
 	public static void setContents(ItemStack stack, ItemStack contents) {
-		if (stack.isEmpty() || !(stack.getItem() instanceof ItemPouch))
+		if (stack.isEmpty() || !(stack.getItem() instanceof PouchItem))
 			throw new IllegalArgumentException("Specified stack is not an ItemPouch");
 		if (contents.isEmpty())
 			stack.removeSubTag("Contents");
@@ -222,7 +222,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 
 	@Environment(EnvType.CLIENT)
 	public float getCustomDurability(ItemStack stack) {
-		ItemStack contents = ItemPouch.getContents(stack);
+		ItemStack contents = PouchItem.getContents(stack);
 		if (contents.isEmpty())
 			return Float.NaN;
 
@@ -234,7 +234,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	public static class Inventory extends ItemInventory {
 
 		public Inventory(ItemStack stack) {
-			super(stack, ItemPouch.SLOTS);
+			super(stack, PouchItem.SLOTS);
 		}
 
 		@Override
@@ -274,11 +274,11 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 	public static class ScreenHandler extends ItemScreenHandler {
 
 		public ScreenHandler(int syncId, PlayerInventory playerInventory, int protectedSlot, ItemStack stack) {
-			super(ItemPouch.SCREEN_HANDLER, syncId, playerInventory, new ItemPouch.Inventory(stack), protectedSlot);
+			super(PouchItem.SCREEN_HANDLER, syncId, playerInventory, new PouchItem.Inventory(stack), protectedSlot);
 		}
 
 		public ScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-			super(ItemPouch.SCREEN_HANDLER, syncId, playerInventory, new ItemPouch.Inventory(ItemStack.EMPTY),
+			super(PouchItem.SCREEN_HANDLER, syncId, playerInventory, new PouchItem.Inventory(ItemStack.EMPTY),
 					buf.readByte());
 		}
 
@@ -287,7 +287,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 			for (int i = 0; i < this.inventory.size(); ++i) {
 				int xx = x + (i % 9) * 18;
 				int yy = y + (i / 9) * 18;
-				this.addSlot(new ItemPouch.Slot(this.inventory, i, xx, yy));
+				this.addSlot(new PouchItem.Slot(this.inventory, i, xx, yy));
 			}
 		}
 
@@ -304,7 +304,7 @@ public class ItemPouch extends Item implements IItemPickupSink, ICustomDurabilit
 
 		@Override
 		public boolean canInsert(ItemStack stack) {
-			if (!ItemPouch.isPouchableItem(stack))
+			if (!PouchItem.isPouchableItem(stack))
 				return false;
 			for (int i = 0; i < this.inventory.size(); i++) {
 				// Ignore this slot to allow swapping if it's the only filled slot.

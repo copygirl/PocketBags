@@ -1,6 +1,6 @@
 package net.mcft.copy.bags.client.mixin;
 
-import net.mcft.copy.bags.ItemPouch;
+import net.mcft.copy.bags.PouchItem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -37,9 +37,9 @@ public abstract class MixinInGameHud {
 	// tooltip - the one above the hotbar when the selected item changes.
 	@ModifyVariable(ordinal = 2, method = "renderHeldItemTooltip", at = @At(value = "INVOKE", by = 1, target = "Lcom/mojang/blaze3d/systems/RenderSystem;defaultBlendFunc()V"))
 	public int pocketbags$renderHeldItemTooltip(int y, MatrixStack matrices) {
-		if (!(this.currentStack.getItem() instanceof ItemPouch))
+		if (!(this.currentStack.getItem() instanceof PouchItem))
 			return y;
-		ItemStack contents = ItemPouch.getContents(this.currentStack);
+		ItemStack contents = PouchItem.getContents(this.currentStack);
 		if (contents.isEmpty())
 			return y;
 		MutableText text = new LiteralText("").append(contents.getName())
@@ -54,9 +54,9 @@ public abstract class MixinInGameHud {
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getMainHandStack()Lnet/minecraft/item/ItemStack;"))
 	public void pocketbags$tick(CallbackInfo info) {
 		ItemStack newStack = this.client.player.inventory.getMainHandStack();
-		if ((this.currentStack.getItem() instanceof ItemPouch) && (newStack.getItem() instanceof ItemPouch)) {
-			ItemStack currentContents = ItemPouch.getContents(this.currentStack);
-			ItemStack newContents = ItemPouch.getContents(newStack);
+		if ((this.currentStack.getItem() instanceof PouchItem) && (newStack.getItem() instanceof PouchItem)) {
+			ItemStack currentContents = PouchItem.getContents(this.currentStack);
+			ItemStack newContents = PouchItem.getContents(newStack);
 			if (!ItemStack.areItemsEqual(currentContents, newContents))
 				this.currentStack = ItemStack.EMPTY;
 		}
