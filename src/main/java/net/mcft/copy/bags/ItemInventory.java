@@ -1,7 +1,11 @@
 package net.mcft.copy.bags;
 
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import net.minecraft.inventory.SimpleInventory;
 
@@ -25,18 +29,13 @@ public abstract class ItemInventory extends SimpleInventory implements Iterable<
 
 	@Override
 	public void markDirty() {
-		Tag tag = writeToTag();
+		Tag tag = this.writeToTag();
 		if (tag == null)
 			this.stack.removeSubTag("Contents");
 		else
 			this.stack.putSubTag("Contents", tag);
 
 		super.markDirty();
-	}
-
-	@Override
-	public Iterator<ItemStack> iterator() {
-		return IntStream.range(0, this.size()).mapToObj(this::getStack).filter(s -> !s.isEmpty()).iterator();
 	}
 
 	@Override
@@ -77,4 +76,12 @@ public abstract class ItemInventory extends SimpleInventory implements Iterable<
 		}
 	}
 
+	@Override
+	public Iterator<ItemStack> iterator() {
+		return IntStream.range(0, this.size()).mapToObj(this::getStack).filter(s -> !s.isEmpty()).iterator();
+	}
+
+	public Stream<ItemStack> stream() {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(this.iterator(), Spliterator.NONNULL), false);
+	}
 }

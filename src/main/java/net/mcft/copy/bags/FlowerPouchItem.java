@@ -3,6 +3,8 @@ package net.mcft.copy.bags;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import net.mcft.copy.bags.client.ICustomDurabilityBar;
 
@@ -10,12 +12,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
+
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -23,14 +27,21 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 @EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
@@ -60,6 +71,72 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 		if (!world.isClient && user.isSneaking() && (hand == Hand.MAIN_HAND))
 			user.openHandledScreen(new ItemScreenHandler.Factory<>(user, FlowerPouchItem.ScreenHandler.class));
 		return super.use(world, user, hand);
+	}
+
+	@Override
+	public ActionResult useOnBlock(ItemUsageContext context) {
+		PlayerEntity player = context.getPlayer();
+		if (player.world.isClient)
+			return ActionResult.FAIL;
+
+		ItemStack pouch = context.getStack();
+		Inventory inventory = new FlowerPouchItem.Inventory(pouch);
+		List<ItemStack> stacks = inventory.stream().collect(Collectors.toList());
+		if (stacks.isEmpty())
+			return ActionResult.FAIL;
+
+		BlockPos clickedPos = context.getBlockPos();
+		Random rnd = player.world.random;
+		ActionResult result = ActionResult.FAIL;
+
+		try {
+			boolean isFirst = true;
+			outerLoop: for (int i = 0; i < 16; i++) {
+				BlockPos pos = clickedPos;
+				for (int j = 0; j <= i / 2; j++) {
+					if (!isFirst)
+						pos = pos.add(rnd.nextInt(3) - 1, rnd.nextInt(3) - 1, rnd.nextInt(3) - 1);
+
+					if (!(isFirst
+							|| player.world.getBlockState(pos).isSideSolidFullSquare(player.world, pos, Direction.UP))
+							|| !player.world.getBlockState(pos.up()).getFluidState().isEmpty()) {
+						if (isFirst)
+							break outerLoop;
+						else
+							continue;
+					}
+
+					int index = rnd.nextInt(stacks.size());
+					ItemStack stack = stacks.get(index);
+					PocketBagsUtil.setStackInHand(player, context.getHand(), stack);
+
+					BlockHitResult hit = new BlockHitResult(Vec3d.ZERO, Direction.UP, pos, false);
+					ItemUsageContext newContext = new ItemUsageContext(player, context.getHand(), hit);
+					if (stack.getItem().useOnBlock(newContext).isAccepted()) {
+						stack.setCount(player.getStackInHand(context.getHand()).getCount());
+						result = ActionResult.SUCCESS;
+						if (isFirst)
+							player.world.playSound(null, pos, SoundEvents.BLOCK_GRASS_PLACE, SoundCategory.PLAYERS,
+									1.0F, 1.0F);
+					} else if (isFirst)
+						break outerLoop;
+
+					if (stack.isEmpty())
+						stacks.remove(index);
+					if (isFirst) {
+						if (player.isSneaking())
+							break outerLoop;
+						isFirst = false;
+					}
+				}
+			}
+		} finally {
+			// Write changes to the item stack and reset held item back to the pouch.
+			inventory.markDirty();
+			PocketBagsUtil.setStackInHand(player, context.getHand(), pouch);
+		}
+
+		return result;
 	}
 
 	@Override

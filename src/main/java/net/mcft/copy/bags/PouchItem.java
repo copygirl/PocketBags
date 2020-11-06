@@ -80,12 +80,12 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 
 	@Override
 	public ActionResult useOnBlock(ItemUsageContext context) {
-		PlayerEntity player = context.getPlayer();
 		ItemStack pouch = context.getStack();
 		ItemStack contents = PouchItem.getContents(pouch);
 		if (contents.isEmpty())
-			return ActionResult.PASS;
-		ActionResult result = ActionResult.PASS;
+			return ActionResult.FAIL;
+		PlayerEntity player = context.getPlayer();
+		ActionResult result = ActionResult.FAIL;
 
 		// Generate the order of block offsets to be used on.
 		Vec3i[] order;
@@ -107,7 +107,7 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 		}
 
 		// Set currently held item to the pouch contents.
-		PouchItem.setStackInHand(player, context.getHand(), contents);
+		PocketBagsUtil.setStackInHand(player, context.getHand(), contents);
 
 		try {
 			// Use contents stack on all blocks in order.
@@ -124,7 +124,7 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
 			PouchItem.setContents(pouch, player.getStackInHand(context.getHand()));
-			PouchItem.setStackInHand(player, context.getHand(), pouch);
+			PocketBagsUtil.setStackInHand(player, context.getHand(), pouch);
 		}
 
 		return result;
@@ -150,7 +150,7 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 		}
 
 		// Set currently held item to the pouch contents.
-		PouchItem.setStackInHand(player, hand, contents);
+		PocketBagsUtil.setStackInHand(player, hand, contents);
 
 		try {
 			// Use contents on found entities.
@@ -165,7 +165,7 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
 			PouchItem.setContents(pouch, player.getStackInHand(hand));
-			PouchItem.setStackInHand(player, hand, pouch);
+			PocketBagsUtil.setStackInHand(player, hand, pouch);
 		}
 
 		return result;
@@ -211,13 +211,6 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 			// Again, toTag writes a byte, but we want it to be an int.
 			tag.putInt("Count", contents.getCount());
 		}
-	}
-
-	private static void setStackInHand(PlayerEntity player, Hand hand, ItemStack stack) {
-		if (hand == Hand.MAIN_HAND)
-			player.inventory.setStack(player.inventory.selectedSlot, stack);
-		else
-			player.inventory.offHand.set(0, stack);
 	}
 
 	@Environment(EnvType.CLIENT)
