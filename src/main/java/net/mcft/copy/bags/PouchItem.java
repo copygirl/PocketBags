@@ -172,6 +172,7 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
 		ItemStack contents = PouchItem.getContents(stack);
 		if (contents.isEmpty())

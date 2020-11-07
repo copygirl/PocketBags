@@ -91,6 +91,7 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 
 		try {
 			boolean isFirst = true;
+			// TODO: Emulating bone meal code here. Could be more straight-forward.
 			outerLoop: for (int i = 0; i < 16; i++) {
 				BlockPos pos = clickedPos;
 				for (int j = 0; j <= i / 2; j++) {
@@ -140,7 +141,9 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
+		// TODO: Adjust this to what Mojang decides to do for bundles in 1.17?
 		ArrayList<ItemStack> stacked = new ArrayList<>();
 		for (ItemStack item : new FlowerPouchItem.Inventory(stack)) {
 			Optional<ItemStack> found = stacked.stream()
@@ -153,10 +156,9 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 		if (stacked.isEmpty())
 			return;
 		stacked.sort((a, b) -> b.getCount() - a.getCount());
-		for (ItemStack item : stacked) {
+		for (ItemStack item : stacked)
 			tooltip.add(new LiteralText(item.getCount() + "x ").append(item.getName())
 					.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
