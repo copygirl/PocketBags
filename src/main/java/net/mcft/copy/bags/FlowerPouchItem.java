@@ -1,6 +1,7 @@
 package net.mcft.copy.bags;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -14,6 +15,8 @@ import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -40,6 +43,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -114,20 +118,26 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 					BlockHitResult hit = new BlockHitResult(Vec3d.ZERO, Direction.UP, pos, false);
 					ItemUsageContext newContext = new ItemUsageContext(player, context.getHand(), hit);
 					if (stack.getItem().useOnBlock(newContext).isAccepted()) {
-						stack.setCount(player.getStackInHand(context.getHand()).getCount());
 						result = ActionResult.SUCCESS;
+
+						// FIXME: Account for the possibility of the item being changed?
+						stack.setCount(player.getStackInHand(context.getHand()).getCount());
+						if (stack.isEmpty()) {
+							stacks.remove(index);
+							if (stacks.isEmpty())
+								break outerLoop;
+						}
+
 						if (isFirst)
 							player.world.playSound(null, pos, SoundEvents.BLOCK_GRASS_PLACE, SoundCategory.PLAYERS,
 									1.0F, 1.0F);
 					} else if (isFirst)
 						break outerLoop;
 
-					if (stack.isEmpty())
-						stacks.remove(index);
 					if (isFirst) {
+						isFirst = false;
 						if (player.isSneaking())
 							break outerLoop;
-						isFirst = false;
 					}
 				}
 			}
@@ -135,6 +145,55 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 			// Write changes to the item stack and reset held item back to the pouch.
 			inventory.markDirty();
 			PocketBagsUtil.setStackInHand(player, context.getHand(), pouch);
+		}
+
+		return result;
+	}
+
+	@Override
+	public ActionResult useOnEntity(ItemStack pouch, PlayerEntity player, LivingEntity origEntity, Hand hand) {
+		Inventory inventory = new FlowerPouchItem.Inventory(pouch);
+		List<ItemStack> stacks = inventory.stream().collect(Collectors.toList());
+		if (stacks.isEmpty())
+			return ActionResult.PASS;
+		Random rnd = player.world.random;
+		ActionResult result = ActionResult.PASS;
+
+		List<LivingEntity> entities;
+		if (player.isSneaking()) {
+			// When sneaking, only interact with the clicked entity.
+			entities = Arrays.asList(origEntity);
+		} else {
+			// Find all entities of the same type (and adult state) in range.
+			Box box = new Box(origEntity.getPos().subtract(1.5, 1.0, 1.5), origEntity.getPos().add(1.5, 1.0, 1.5));
+			@SuppressWarnings("unchecked")
+			EntityType<LivingEntity> type = (EntityType<LivingEntity>) origEntity.getType();
+			entities = player.world.getEntitiesByType(type, box, e -> (e.isBaby() == origEntity.isBaby()));
+		}
+
+		try {
+			// Use contents on found entities.
+			for (LivingEntity entity : entities) {
+				int index = rnd.nextInt(stacks.size());
+				ItemStack stack = stacks.get(index);
+				PocketBagsUtil.setStackInHand(player, hand, stack);
+
+				if (entity.interact(player, hand).isAccepted()
+						|| stack.getItem().useOnEntity(stack, player, entity, hand).isAccepted()) {
+					result = ActionResult.SUCCESS;
+
+					stack.setCount(player.getStackInHand(hand).getCount());
+					if (stack.isEmpty()) {
+						stacks.remove(index);
+						if (stacks.isEmpty())
+							break;
+					}
+				}
+			}
+		} finally {
+			// Write changes to the item stack and reset held item back to the pouch.
+			inventory.markDirty();
+			PocketBagsUtil.setStackInHand(player, hand, pouch);
 		}
 
 		return result;

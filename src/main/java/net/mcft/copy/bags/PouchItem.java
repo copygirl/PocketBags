@@ -116,10 +116,11 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 				Vec3d hitPos = context.getHitPos().add(Vec3d.of(order[i]));
 				BlockHitResult hit = new BlockHitResult(hitPos, context.getSide(), pos, context.hitsInsideBlock());
 				ItemUsageContext newContext = new ItemUsageContext(player, context.getHand(), hit);
-				if (contents.getItem().useOnBlock(newContext).isAccepted())
+				if (contents.getItem().useOnBlock(newContext).isAccepted()) {
 					result = ActionResult.SUCCESS;
-				if (player.getStackInHand(context.getHand()).isEmpty())
-					break;
+					if (player.getStackInHand(context.getHand()).isEmpty())
+						break;
+				}
 			}
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
@@ -157,10 +158,11 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 			for (LivingEntity entity : entities) {
 				ItemStack stack = player.getStackInHand(hand);
 				if (entity.interact(player, hand).isAccepted()
-						|| stack.getItem().useOnEntity(stack, player, entity, hand).isAccepted())
+						|| stack.getItem().useOnEntity(stack, player, entity, hand).isAccepted()) {
 					result = ActionResult.SUCCESS;
-				if (player.getStackInHand(hand).isEmpty())
-					break;
+					if (player.getStackInHand(hand).isEmpty())
+						break;
+				}
 			}
 		} finally {
 			// Update pouch contents and reset the held item to the pouch.
