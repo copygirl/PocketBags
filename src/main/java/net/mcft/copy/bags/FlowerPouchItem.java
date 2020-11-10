@@ -45,6 +45,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -228,6 +229,11 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 		for (ItemStack item : new FlowerPouchItem.Inventory(stack))
 			count += item.getCount();
 		return (count > 0) ? (float) count / maxCount : Float.NaN;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public int getCustomDurabilityColor(float fraction) {
+		return MathHelper.packRgb(0.4F, 0.4F, 1.0F);
 	}
 
 	public static class Inventory extends ItemInventory {

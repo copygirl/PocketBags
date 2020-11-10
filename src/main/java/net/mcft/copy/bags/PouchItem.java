@@ -37,6 +37,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -225,6 +226,11 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 		float count = contents.getCount();
 		float maxCount = contents.getMaxCount() * 9;
 		return count / maxCount;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public int getCustomDurabilityColor(float fraction) {
+		return MathHelper.packRgb(0.4F, 0.4F, 1.0F);
 	}
 
 	public static class Inventory extends ItemInventory {
