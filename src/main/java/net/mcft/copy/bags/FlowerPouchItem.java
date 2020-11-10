@@ -54,6 +54,7 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 
 	public static final int SLOTS = 18;
 	public static final int MAX_COUNT_PER_STACK = 32;
+	public static final int MAX_TOOLTIP_ITEMS = 5; // Maximum items shown in tooltip before some are hidden.
 	public static final Identifier IDENTIFIER = new Identifier(PocketBagsMod.MOD_ID, "flower_pouch");
 
 	public static final ScreenHandlerType<FlowerPouchItem.ScreenHandler> SCREEN_HANDLER = ScreenHandlerRegistry
@@ -203,7 +204,6 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		// TODO: Adjust this to what Mojang decides to do for bundles in 1.17?
 		ArrayList<ItemStack> stacked = new ArrayList<>();
 		for (ItemStack item : new FlowerPouchItem.Inventory(stack)) {
 			Optional<ItemStack> found = stacked.stream()
@@ -216,9 +216,22 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 		if (stacked.isEmpty())
 			return;
 		stacked.sort((a, b) -> b.getCount() - a.getCount());
-		for (ItemStack item : stacked)
-			tooltip.add(new LiteralText(item.getCount() + "x ").append(item.getName())
-					.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+		if (stacked.size() <= MAX_TOOLTIP_ITEMS)
+			for (ItemStack item : stacked)
+				appendTooltipSingle(item, tooltip);
+		else {
+			for (int i = 0; i < MAX_TOOLTIP_ITEMS / 2; i++)
+				appendTooltipSingle(stacked.get(i), tooltip);
+			tooltip.add(new LiteralText("and " + stacked.size() + " more...") // TODO: Localization.
+					.setStyle(Style.EMPTY.withItalic(true).withColor(Formatting.GRAY)));
+			for (int i = stacked.size() - MAX_TOOLTIP_ITEMS / 2; i < stacked.size(); i++)
+				appendTooltipSingle(stacked.get(i), tooltip);
+		}
+	}
+
+	private static void appendTooltipSingle(ItemStack stack, List<Text> tooltip) {
+		tooltip.add(new LiteralText(stack.getCount() + "x ").append(stack.getName())
+				.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
 	}
 
 	@Environment(EnvType.CLIENT)
