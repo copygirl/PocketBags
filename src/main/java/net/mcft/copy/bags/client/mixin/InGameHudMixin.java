@@ -1,6 +1,7 @@
 package net.mcft.copy.bags.client.mixin;
 
 import net.mcft.copy.bags.PouchItem;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InGameHud.class)
-public abstract class MixinInGameHud {
+public abstract class InGameHudMixin {
 
 	@Shadow
 	private ItemStack currentStack;

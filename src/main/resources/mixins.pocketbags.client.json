@@ -3,7 +3,8 @@
   "package": "net.mcft.copy.bags.client.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinInGameHud",
-    "MixinItemRenderer"
+    "InGameHudMixin",
+    "ItemRendererAccessor",
+    "ItemRendererMixin"
   ]
 }

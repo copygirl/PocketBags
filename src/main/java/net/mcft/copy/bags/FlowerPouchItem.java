@@ -204,6 +204,28 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
+		List<ItemStack> contents = getContentsStackedAndSorted(stack);
+		if (contents.isEmpty())
+			return;
+		if (contents.size() <= MAX_TOOLTIP_ITEMS)
+			for (ItemStack item : contents)
+				appendTooltipSingle(item, tooltip);
+		else {
+			for (int i = 0; i < MAX_TOOLTIP_ITEMS / 2; i++)
+				appendTooltipSingle(contents.get(i), tooltip);
+			tooltip.add(new LiteralText("and " + contents.size() + " more...") // TODO: Localization.
+					.setStyle(Style.EMPTY.withItalic(true).withColor(Formatting.GRAY)));
+			for (int i = contents.size() - MAX_TOOLTIP_ITEMS / 2; i < contents.size(); i++)
+				appendTooltipSingle(contents.get(i), tooltip);
+		}
+	}
+
+	private static void appendTooltipSingle(ItemStack stack, List<Text> tooltip) {
+		tooltip.add(new LiteralText(stack.getCount() + "x ").append(stack.getName())
+				.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+	}
+
+	public static List<ItemStack> getContentsStackedAndSorted(ItemStack stack) {
 		ArrayList<ItemStack> stacked = new ArrayList<>();
 		for (ItemStack item : new FlowerPouchItem.Inventory(stack)) {
 			Optional<ItemStack> found = stacked.stream()
@@ -213,25 +235,8 @@ public class FlowerPouchItem extends Item implements IItemPickupSink, ICustomDur
 			else
 				stacked.add(item);
 		}
-		if (stacked.isEmpty())
-			return;
 		stacked.sort((a, b) -> b.getCount() - a.getCount());
-		if (stacked.size() <= MAX_TOOLTIP_ITEMS)
-			for (ItemStack item : stacked)
-				appendTooltipSingle(item, tooltip);
-		else {
-			for (int i = 0; i < MAX_TOOLTIP_ITEMS / 2; i++)
-				appendTooltipSingle(stacked.get(i), tooltip);
-			tooltip.add(new LiteralText("and " + stacked.size() + " more...") // TODO: Localization.
-					.setStyle(Style.EMPTY.withItalic(true).withColor(Formatting.GRAY)));
-			for (int i = stacked.size() - MAX_TOOLTIP_ITEMS / 2; i < stacked.size(); i++)
-				appendTooltipSingle(stacked.get(i), tooltip);
-		}
-	}
-
-	private static void appendTooltipSingle(ItemStack stack, List<Text> tooltip) {
-		tooltip.add(new LiteralText(stack.getCount() + "x ").append(stack.getName())
-				.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+		return stacked;
 	}
 
 	@Environment(EnvType.CLIENT)

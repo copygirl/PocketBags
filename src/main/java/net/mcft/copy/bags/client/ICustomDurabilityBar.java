@@ -12,7 +12,7 @@ import net.minecraft.util.math.MathHelper;
  * damaged state, or an additional one on top of that. Note that this durability
  * bar renders before the default one.
  *
- * @see net.mcft.copy.bags.client.mixin.MixinItemRenderer MixinItemRenderer
+ * @see net.mcft.copy.bags.client.mixin.ItemRendererMixin ItemRendererMixin
  */
 @Environment(EnvType.CLIENT)
 public interface ICustomDurabilityBar {

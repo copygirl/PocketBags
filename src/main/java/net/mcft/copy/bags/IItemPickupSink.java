@@ -8,7 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
  * override player pickup behavior, for example to collect the picked up item
  * into itself rather than the player's inventory.
  *
- * @see net.mcft.copy.bags.mixin.MixinItemEntity MixinItemEntity
+ * @see net.mcft.copy.bags.mixin.ItemEntityMixin ItemEntityMixin
  */
 public interface IItemPickupSink {
 

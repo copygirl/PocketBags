@@ -3,6 +3,6 @@
   "package": "net.mcft.copy.bags.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinItemEntity"
+    "ItemEntityMixin"
   ]
 }
