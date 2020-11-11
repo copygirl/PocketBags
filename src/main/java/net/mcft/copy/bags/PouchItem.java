@@ -10,12 +10,14 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.fabric.api.tag.TagRegistry;
+import net.fabricmc.fabric.api.util.NbtType;
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.DyeableItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -43,9 +45,10 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 @EnvironmentInterface(value = EnvType.CLIENT, itf = ICustomDurabilityBar.class)
-public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilityBar {
+public class PouchItem extends Item implements DyeableItem, IItemPickupSink, ICustomDurabilityBar {
 
 	public static final int SLOTS = 9;
+	public static final int DEFAULT_COLOR = 0xfff4e2;
 	public static final Identifier IDENTIFIER = new Identifier(PocketBagsMod.MOD_ID, "pouch");
 	public static final Tag<Item> POUCHABLE_TAG = TagRegistry.item(new Identifier(PocketBagsMod.MOD_ID, "pouchable"));
 
@@ -182,6 +185,13 @@ public class PouchItem extends Item implements IItemPickupSink, ICustomDurabilit
 			return;
 		tooltip.add(new LiteralText(contents.getCount() + "x ").append(contents.getName())
 				.setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+	}
+
+	@Override
+	public int getColor(ItemStack stack) {
+		CompoundTag display = stack.getSubTag("display");
+		return ((display != null) && display.contains("color", NbtType.NUMBER)) ? display.getInt("color")
+				: DEFAULT_COLOR;
 	}
 
 	public static boolean isPouchableItem(ItemStack stack) {
