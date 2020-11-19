@@ -274,6 +274,8 @@ public class PouchItem extends Item implements DyeableItem, IItemPickupSink, ICu
 				else
 					contents.increment(invStack.getCount());
 			}
+			if (contents.isEmpty())
+				return null;
 
 			CompoundTag compound = contents.toTag(new CompoundTag());
 			// Again, toTag writes a byte, but we want it to be an int.
