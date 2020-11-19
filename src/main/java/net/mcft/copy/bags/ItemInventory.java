@@ -19,8 +19,13 @@ public abstract class ItemInventory extends SimpleInventory implements Iterable<
 	public ItemInventory(ItemStack stack, int size) {
 		super(size);
 		this.stack = stack;
-		if (stack.hasTag() && stack.getTag().contains("Contents"))
-			this.readFromTag(stack.getTag().get("Contents"));
+		if (stack.hasTag()) {
+			Tag tag;
+			if (((tag = stack.getTag().get("Contents")) != null)
+					// BACKWARDS COMPATIBILITY: 1.0.0
+					|| ((tag = stack.getTag().get("pocketbags:pouch")) != null))
+				this.readFromTag(tag);
+		}
 	}
 
 	protected abstract void readFromTag(Tag tag);

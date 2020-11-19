@@ -206,8 +206,12 @@ public class PouchItem extends Item implements DyeableItem, IItemPickupSink, ICu
 		if (stack.isEmpty() || !(stack.getItem() instanceof PouchItem))
 			return ItemStack.EMPTY;
 		CompoundTag tag = stack.getSubTag("Contents");
-		if (tag == null)
-			return ItemStack.EMPTY;
+		if (tag == null) {
+			// BACKWARDS COMPATIBILITY: 1.0.0
+			tag = stack.getSubTag("pocketbags:pouch");
+			if (tag == null)
+				return ItemStack.EMPTY;
+		}
 		ItemStack contents = ItemStack.fromTag(tag);
 		// fromTag reads a byte but we want an int to allow Count > 127.
 		contents.setCount(tag.getInt("Count"));
